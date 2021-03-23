@@ -4546,6 +4546,27 @@ public:
     operator HRESULT() const { return m_hr; }
     HRESULT m_hr;
 };
+
+HRESULT GetUIObjectOfFile(HWND hwnd, LPCWSTR pszPath, REFIID riid, void** ppv)
+{
+    *ppv = NULL;
+    HRESULT hr;
+    LPITEMIDLIST pidl;
+    SFGAOF sfgao;
+    if (SUCCEEDED(hr = SHParseDisplayName(pszPath, NULL, &pidl, 0, &sfgao)))
+    {
+        IShellFolder* psf;
+        LPCITEMIDLIST pidlChild;
+        if (SUCCEEDED(hr = SHBindToParent(pidl, IID_IShellFolder,
+            (void**)&psf, &pidlChild)))
+        {
+            hr = psf->GetUIObjectOf(hwnd, 1, &pidlChild, riid, NULL, ppv);
+            psf->Release();
+        }
+        CoTaskMemFree(pidl);
+    }
+    return hr;
+}
 //==============================================================================
 void SystemClipboard::copyTextToClipboard (const String& text)
 {
