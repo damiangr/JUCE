@@ -613,6 +613,48 @@ String SystemClipboard::getTextFromClipboard()
 {
     return nsStringToJuce ([[NSPasteboard generalPasteboard] stringForType: NSPasteboardTypeString]);
 }
+void SystemClipboard::copyToClipboard (const String& file)
+{
+        auto* nsFilename = juceStringToNS (file);
+        auto fileURL = [NSURL fileURLWithPath: nsFilename];
+        //auto dragItem = [[NSDraggingItem alloc] initWithPasteboardWriter: fileURL];
+        NSURL *object = [[NSURL alloc] initFileURLWithPath:nsFilename ];
+        NSPasteboard *pb = [NSPasteboard generalPasteboard];
+        [pb clearContents];
+        [pb declareTypes: [NSArray arrayWithObject: NSPasteboardTypeFileURL]
+                   owner: nil];
+        
+        NSArray *objectsToCopy = [[NSArray alloc] initWithObjects:object, nil];
+        BOOL pasted = [pb writeObjects:objectsToCopy];
+        
+      //  if(pasted) // paste was successful
+        //    NSLog(@"pasted");
+        
+      //  [object release];
+      //  [objectsToCopy release];
+      //  [pb release];
+}
+    
+uint SystemClipboard::getClipboardFileArray(StringArray& fileArray)
+{
+        NSPasteboard *pasteboard = [NSPasteboard generalPasteboard];
+        NSArray *classes = [NSArray arrayWithObject:[NSURL class]];
+        
+        NSDictionary *options = [NSDictionary dictionaryWithObject:
+                                 [NSNumber numberWithBool:YES] forKey:NSPasteboardURLReadingFileURLsOnlyKey];
+        
+        NSArray *fileURLs =
+        [pasteboard readObjectsForClasses:classes options:options];
+        for (unsigned int i = 0; i < [fileURLs count]; ++i)
+        {
+            NSURL* url = [fileURLs objectAtIndex: i];
+            
+            if ([url isFileURL])
+                fileArray.add (nsStringToJuce ([url path]));
+        }
+        return [fileURLs count];
+        
+}
 
 void Process::setDockIconVisible (bool isVisible)
 {

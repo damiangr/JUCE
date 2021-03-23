@@ -159,6 +159,8 @@
  #include <shlwapi.h>
  #include <mmsystem.h>
  #include <winioctl.h>
+ #include <ole2.h>
+ #include <atlbase.h>
 
  #if JUCE_MINGW
   #include <basetyps.h>

@@ -44,6 +44,12 @@ public:
         anything..
     */
     static String getTextFromClipboard();
+
+    /** Copies a File path onto the clipboard */
+    static bool copyFileToClipboard(const String& file);
+
+    /** Gets the current clipboard's file array */
+    static uint32_t getClipboardFileArray(StringArray& fileArray);
 };
 
 } // namespace juce

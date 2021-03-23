@@ -4533,7 +4533,19 @@ void LookAndFeel::playAlertSound()
 {
     MessageBeep (MB_OK);
 }
+//==============================================================================
 
+class COleInitialize
+{
+public:
+    COleInitialize() : m_hr(OleInitialize(NULL))
+    {
+    }
+
+    ~COleInitialize() { if (SUCCEEDED(m_hr)) OleUninitialize(); }
+    operator HRESULT() const { return m_hr; }
+    HRESULT m_hr;
+};
 //==============================================================================
 void SystemClipboard::copyTextToClipboard (const String& text)
 {
@@ -4582,7 +4594,45 @@ String SystemClipboard::getTextFromClipboard()
 
     return result;
 }
+bool SystemClipboard::copyFileToClipboard(const String& file)
+{
 
+    COleInitialize init;
+    CComPtr<IDataObject> spdto;
+
+    if (SUCCEEDED(init) &&
+        SUCCEEDED(GetUIObjectOfFile(nullptr, file.toWideCharPointer(), IID_PPV_ARGS(&spdto))) &&
+        SUCCEEDED(OleSetClipboard(spdto)) &&
+        SUCCEEDED(OleFlushClipboard()))
+    {
+        return true;
+    }
+    else return false;
+}
+
+UINT SystemClipboard::getClipboardFileArray(StringArray& fileArray)
+{
+    UINT fileCount = 0;
+    TCHAR lpszFileName[MAX_PATH];
+    if (IsClipboardFormatAvailable(CF_HDROP) && OpenClipboard(NULL))
+    {
+        HGLOBAL h = GetClipboardData(CF_HDROP);
+        HDROP ptr = (HDROP)GlobalLock(h);
+        if (h != NULL && ptr != NULL)
+        {
+            fileCount = DragQueryFile(ptr, 0xFFFFFFFF, nullptr, 0);
+            for (UINT i = 0; i < fileCount; ++i)
+            {
+                UINT filenameLength = DragQueryFile(ptr, i, nullptr, 0);
+                DragQueryFile(ptr, i, lpszFileName, filenameLength + 1);
+                fileArray.add(lpszFileName);
+            }
+            GlobalLock(h);
+        }
+        CloseClipboard();
+    }
+    return fileCount;
+}
 //==============================================================================
 void Desktop::setKioskComponent (Component* kioskModeComp, bool enableOrDisable, bool /*allowMenusAndBars*/)
 {
