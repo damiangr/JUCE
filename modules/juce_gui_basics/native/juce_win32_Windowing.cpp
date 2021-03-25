@@ -4615,7 +4615,7 @@ String SystemClipboard::getTextFromClipboard()
 
     return result;
 }
-bool SystemClipboard::copyFileToClipboard(const String& file)
+void SystemClipboard::copyFileToClipboard(const String& file)
 {
 
     COleInitialize init;
@@ -4626,9 +4626,9 @@ bool SystemClipboard::copyFileToClipboard(const String& file)
         SUCCEEDED(OleSetClipboard(spdto)) &&
         SUCCEEDED(OleFlushClipboard()))
     {
-        return true;
+        
     }
-    else return false;
+    
 }
 
 UINT SystemClipboard::getClipboardFileArray(StringArray& fileArray)
