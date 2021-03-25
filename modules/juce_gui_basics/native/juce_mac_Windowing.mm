@@ -613,7 +613,7 @@ String SystemClipboard::getTextFromClipboard()
 {
     return nsStringToJuce ([[NSPasteboard generalPasteboard] stringForType: NSPasteboardTypeString]);
 }
-void SystemClipboard::copyToClipboard (const String& file)
+void SystemClipboard::copyFileToClipboard (const String& file)
 {
         auto* nsFilename = juceStringToNS (file);
         auto fileURL = [NSURL fileURLWithPath: nsFilename];
